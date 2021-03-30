@@ -2,14 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
-using Enums;
-
+using MetricsCommon;
 namespace MetricsManagerTests
 {
     public class RamControllerUnitTests
     {
         private RamMetricsController controller;
-
         public RamControllerUnitTests()
         {
             controller = new RamMetricsController();

@@ -2,14 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
-using Enums;
+using MetricsCommon;
 
 namespace MetricsAgentTests
 {
     public class RamControllerUnitTests
     {
         private RamMetricsController controller;
-
         public RamControllerUnitTests()
         {
             controller = new RamMetricsController();
@@ -24,13 +23,13 @@ namespace MetricsAgentTests
             var percentile = Percentile.P99;
 
             //Act
-            var getMetricsFromAllClusterResult = controller.GetMetricsFromAllCluster(fromTime, toTime);
-            var getMetricsByPercentileFromAllClusterResult = controller.GetMetricsByPercentileFromAllCluster(fromTime, toTime, percentile);
+            var getMetricsResult = controller.GetMetrics(fromTime, toTime);
+            var getMetricsByPercentileResult = controller.GetMetricsByPercentile(fromTime, toTime, percentile);
             var getMetricsAvailableResult = controller.GetMetricsAvailable();
 
             // Assert
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsFromAllClusterResult);
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsByPercentileFromAllClusterResult);
+            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsResult);
+            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsByPercentileResult);
             _ = Assert.IsAssignableFrom<IActionResult>(getMetricsAvailableResult);
         }
     }

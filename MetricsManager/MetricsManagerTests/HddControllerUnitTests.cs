@@ -2,14 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
-using Enums;
+using MetricsCommon;
 
 namespace MetricsManagerTests
 {
     public class HddControllerUnitTests
     {
         private HddMetricsController controller;
-
         public HddControllerUnitTests()
         {
             controller = new HddMetricsController();

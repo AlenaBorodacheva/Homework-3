@@ -1,14 +1,14 @@
-﻿using MetricsManager.Controllers;
+using MetricsManager.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
+using MetricsCommon;
 
 namespace MetricsManagerTests
 {
     public class AgentsControllerUnitTests
     {
         private AgentsController controller;
-
         public AgentsControllerUnitTests()
         {
             controller = new AgentsController();

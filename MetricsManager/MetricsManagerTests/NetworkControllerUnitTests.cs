@@ -2,14 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
-using Enums;
+using MetricsCommon;
 
 namespace MetricsManagerTests
 {
     public class NetworkControllerUnitTests
     {
         private NetworkMetricsController controller;
-
         public NetworkControllerUnitTests()
         {
             controller = new NetworkMetricsController();

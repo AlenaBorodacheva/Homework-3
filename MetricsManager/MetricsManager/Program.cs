@@ -23,5 +23,4 @@ namespace MetricsManager
                     webBuilder.UseStartup<Startup>();
                 });
     }
-    
 }

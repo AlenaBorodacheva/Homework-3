@@ -1,15 +1,14 @@
-using MetricsManager.Controllers;
+﻿using MetricsManager.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
-using Enums;
+using MetricsCommon;
 
 namespace MetricsManagerTests
 {
     public class CpuControllerUnitTests
     {
         private CpuMetricsController controller;
-
         public CpuControllerUnitTests()
         {
             controller = new CpuMetricsController();
