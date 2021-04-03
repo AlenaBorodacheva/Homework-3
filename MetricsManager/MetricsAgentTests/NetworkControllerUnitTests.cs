@@ -1,34 +1,35 @@
 ﻿using MetricsAgent.Controllers;
-using Microsoft.AspNetCore.Mvc;
+using Moq;
 using System;
 using Xunit;
-using MetricsCommon;
+using MetricsAgent;
 
 namespace MetricsAgentTests
 {
     public class NetworkControllerUnitTests
     {
-        private NetworkMetricsController controller;
+        private NetworkMetricsController _controller;
+
+        private Mock<INetworkMetricsRepository> _mock;
+
         public NetworkControllerUnitTests()
         {
-            controller = new NetworkMetricsController();
+            _mock = new Mock<INetworkMetricsRepository>();
+
+            _controller = new NetworkMetricsController(_mock.Object);
         }
 
         [Fact]
-        public void GetMetricsFromAgent_ReturnsOk()
+        public void Create_ShouldCall_Create_From_Repository()
         {
-            //Arrange
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
-            var percentile = Percentile.P99;
+            _mock.Setup(repository => repository.Create(It.IsAny<NetworkMetric>())).Verifiable();
+            _mock.Setup(repository => repository.GetAll()).Verifiable();
 
-            //Act
-            var getMetricsByPercentileResult = controller.GetMetricsByPercentile(fromTime, toTime, percentile);
-            var getMetricsResult = controller.GetMetrics(fromTime, toTime);
+            var resultCreate = _controller.Create(new NetworkMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
+            var resultGetAll = _controller.GetAll();
 
-            // Assert
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsByPercentileResult);
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsResult);
+            _mock.Verify(repository => repository.Create(It.IsAny<NetworkMetric>()), Times.AtMostOnce());
+            _mock.Verify(repository => repository.GetAll());
         }
     }
 }

@@ -1,34 +1,40 @@
-using MetricsAgent.Controllers;
-using Microsoft.AspNetCore.Mvc;
+﻿using MetricsAgent.Controllers;
+using Moq;
 using System;
 using Xunit;
-using MetricsCommon;
+using MetricsAgent;
 
 namespace MetricsAgentTests
 {
     public class CpuControllerUnitTests
     {
-        private CpuMetricsController controller;
+        private CpuMetricsController _controller;
+
+        private Mock<ICpuMetricsRepository> _mock;
+
         public CpuControllerUnitTests()
         {
-            controller = new CpuMetricsController();
+            _mock = new Mock<ICpuMetricsRepository>();
+
+            _controller = new CpuMetricsController(_mock.Object);
         }
 
         [Fact]
-        public void GetMetricsFromAgent_ReturnsOk()
+        public void Create_ShouldCall_Create_From_Repository()
         {
-            //Arrange
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
-            var percentile = Percentile.P99;
+            // устанавливаем параметр заглушки
+            // в заглушке прописываем что в репозиторий прилетит CpuMetric объект
+            _mock.Setup(repository => repository.Create(It.IsAny<CpuMetric>())).Verifiable();
+            _mock.Setup(repository => repository.GetAll()).Verifiable();
 
-            //Act
-            var getMetricsByPercentileResult = controller.GetMetricsByPercentile(fromTime, toTime, percentile);
-            var getMetricsResult = controller.GetMetrics(fromTime, toTime);
+            // выполняем действие на контроллере
+            var resultCreate = _controller.Create(new CpuMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
+            var resultGetAll = _controller.GetAll();
 
-            // Assert
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsByPercentileResult);
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsResult);
+            // проверяем заглушку на то, что пока работал контроллер
+            // действительно вызвался метод Create репозитория с нужным типом объекта в параметре
+            _mock.Verify(repository => repository.Create(It.IsAny<CpuMetric>()), Times.AtMostOnce());
+            _mock.Verify(repository => repository.GetAll());
         }
     }
 }

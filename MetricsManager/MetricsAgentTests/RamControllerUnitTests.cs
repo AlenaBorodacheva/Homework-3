@@ -1,36 +1,35 @@
 ﻿using MetricsAgent.Controllers;
-using Microsoft.AspNetCore.Mvc;
+using Moq;
 using System;
 using Xunit;
-using MetricsCommon;
+using MetricsAgent;
 
 namespace MetricsAgentTests
 {
     public class RamControllerUnitTests
     {
-        private RamMetricsController controller;
+        private RamMetricsController _controller;
+
+        private Mock<IRamMetricsRepository> _mock;
+
         public RamControllerUnitTests()
         {
-            controller = new RamMetricsController();
+            _mock = new Mock<IRamMetricsRepository>();
+
+            _controller = new RamMetricsController(_mock.Object);
         }
 
         [Fact]
-        public void GetMetricsFromAgent_ReturnsOk()
+        public void Create_ShouldCall_Create_From_Repository()
         {
-            //Arrange
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
-            var percentile = Percentile.P99;
+            _mock.Setup(repository => repository.Create(It.IsAny<RamMetric>())).Verifiable();
+            _mock.Setup(repository => repository.GetAll()).Verifiable();
 
-            //Act
-            var getMetricsResult = controller.GetMetrics(fromTime, toTime);
-            var getMetricsByPercentileResult = controller.GetMetricsByPercentile(fromTime, toTime, percentile);
-            var getMetricsAvailableResult = controller.GetMetricsAvailable();
+            var resultCreate = _controller.Create(new RamMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
+            var resultGetAll = _controller.GetAll();
 
-            // Assert
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsResult);
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsByPercentileResult);
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsAvailableResult);
+            _mock.Verify(repository => repository.Create(It.IsAny<RamMetric>()), Times.AtMostOnce());
+            _mock.Verify(repository => repository.GetAll());
         }
     }
 }

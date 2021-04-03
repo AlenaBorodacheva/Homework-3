@@ -1,36 +1,35 @@
 ﻿using MetricsAgent.Controllers;
-using Microsoft.AspNetCore.Mvc;
+using Moq;
 using System;
 using Xunit;
-using MetricsCommon;
+using MetricsAgent;
 
 namespace MetricsAgentTests
 {
     public class DotNetControllerUnitTests
     {
-        private DotNetMetricsController controller;
+        private DotNetMetricsController _controller;
+
+        private Mock<IDotNetMetricsRepository> _mock;
+
         public DotNetControllerUnitTests()
         {
-            controller = new DotNetMetricsController();
+            _mock = new Mock<IDotNetMetricsRepository>();
+
+            _controller = new DotNetMetricsController(_mock.Object);
         }
 
         [Fact]
-        public void GetMetricsFromAgent_ReturnsOk()
+        public void Create_ShouldCall_Create_From_Repository()
         {
-            //Arrange
-            var fromTime = TimeSpan.FromSeconds(0);
-            var toTime = TimeSpan.FromSeconds(100);
-            var percentile = Percentile.P99;
+            _mock.Setup(repository => repository.Create(It.IsAny<DotNetMetric>())).Verifiable();
+            _mock.Setup(repository => repository.GetAll()).Verifiable();
 
-            //Act
-            var getMetricsResult = controller.GetMetrics(fromTime, toTime);
-            var getMetricsByPercentileResult = controller.GetMetricsByPercentile(fromTime, toTime, percentile);
-            var getMetricsFromErrorsCountResult = controller.GetMetricsFromErrorsCount(fromTime, toTime);
+            var resultCreate = _controller.Create(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
+            var resultGetAll = _controller.GetAll();
 
-            // Assert
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsResult);
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsByPercentileResult);
-            _ = Assert.IsAssignableFrom<IActionResult>(getMetricsFromErrorsCountResult);
+            _mock.Verify(repository => repository.Create(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
+            _mock.Verify(repository => repository.GetAll());
         }
     }
 }
