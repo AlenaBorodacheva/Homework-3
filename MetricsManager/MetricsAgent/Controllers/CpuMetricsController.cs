@@ -45,6 +45,28 @@ namespace MetricsAgent.Controllers
             return Ok();
         }
 
+        [HttpGet("all")]
+        public IActionResult GetAll()
+        {
+            var metrics = _repository.GetAll();
+
+            if(metrics != null)
+            {
+                var response = new AllCpuMetricsResponse()
+                {
+                    Metrics = new List<CpuMetric>()
+                };
+
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(new CpuMetric { Time = metric.Time, Value = metric.Value, Id = metric.Id });
+                }
+
+                return Ok(response);
+            }
+            return BadRequest();
+        }
+
         [HttpDelete("delete")]
         public IActionResult Delete([FromBody] int id)
         {

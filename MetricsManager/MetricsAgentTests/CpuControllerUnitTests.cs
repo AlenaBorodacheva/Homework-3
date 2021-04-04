@@ -59,9 +59,19 @@ namespace MetricsAgentTests
         {
             _mock.Setup(repository => repository.GetById(1)).Verifiable();
 
-            var resultGetById = _controller.GetById(1);
+            var result = _controller.GetById(1);
 
             _mock.Verify(repository => repository.GetById(1));
+        }
+
+        [Fact]
+        public void Create_ShouldCall_GetAll_From_Repository()
+        {
+            _mock.Setup(repository => repository.GetAll()).Verifiable();
+
+            var result = _controller.GetAll();
+
+            _mock.Verify(repository => repository.GetAll());
         }
     }
 }
