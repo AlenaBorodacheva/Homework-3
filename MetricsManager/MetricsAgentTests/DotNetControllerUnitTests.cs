@@ -23,21 +23,39 @@ namespace MetricsAgentTests
         public void Create_ShouldCall_Create_From_Repository()
         {
             _mock.Setup(repository => repository.Create(It.IsAny<DotNetMetric>())).Verifiable();
-            _mock.Setup(repository => repository.GetAll()).Verifiable();
+           
+            var result = _controller.Create(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
+            
+            _mock.Verify(repository => repository.Create(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
+        }
+
+        [Fact]
+        public void Create_ShouldCall_Update_From_Repository()
+        {
             _mock.Setup(repository => repository.Update(It.IsAny<DotNetMetric>())).Verifiable();
+
+            var result = _controller.Update(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
+
+            _mock.Verify(repository => repository.Update(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
+        }
+
+        [Fact]
+        public void Create_ShouldCall_Delete_From_Repository()
+        {
             _mock.Setup(repository => repository.Delete(1)).Verifiable();
+
+            var result = _controller.Delete(1);
+
+            _mock.Verify(repository => repository.Delete(1));
+        }
+
+        [Fact]
+        public void Create_ShouldCall_GetById_From_Repository()
+        {
             _mock.Setup(repository => repository.GetById(1)).Verifiable();
 
-            var resultCreate = _controller.Create(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
-            var resultGetAll = _controller.GetAll();
-            var resultUpdate = _controller.Update(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
-            var resultDelete = _controller.Delete(1);
-            var resultGetById = _controller.GetById(1);
+            var result = _controller.GetById(1);
 
-            _mock.Verify(repository => repository.Create(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
-            _mock.Verify(repository => repository.GetAll());
-            _mock.Verify(repository => repository.Update(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
-            _mock.Verify(repository => repository.Delete(1));
             _mock.Verify(repository => repository.GetById(1));
         }
     }

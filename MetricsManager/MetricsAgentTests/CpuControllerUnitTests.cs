@@ -25,24 +25,42 @@ namespace MetricsAgentTests
             // устанавливаем параметр заглушки
             // в заглушке прописываем что в репозиторий прилетит CpuMetric объект
             _mock.Setup(repository => repository.Create(It.IsAny<CpuMetric>())).Verifiable();
-            _mock.Setup(repository => repository.GetAll()).Verifiable();
-            _mock.Setup(repository => repository.Update(It.IsAny<CpuMetric>())).Verifiable();
-            _mock.Setup(repository => repository.Delete(1)).Verifiable();
-            _mock.Setup(repository => repository.GetById(1)).Verifiable();
 
             // выполняем действие на контроллере
-            var resultCreate = _controller.Create(new CpuMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
-            var resultGetAll = _controller.GetAll();
-            var resultUpdate = _controller.Update(new CpuMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
-            var resultDelete = _controller.Delete(1);
-            var resultGetById = _controller.GetById(1);
+            var result = _controller.Create(new CpuMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
 
             // проверяем заглушку на то, что пока работал контроллер
             // действительно вызвался метод Create репозитория с нужным типом объекта в параметре
             _mock.Verify(repository => repository.Create(It.IsAny<CpuMetric>()), Times.AtMostOnce());
-            _mock.Verify(repository => repository.GetAll());
+        }
+
+        [Fact]
+        public void Create_ShouldCall_Update_From_Repository()
+        {
+            _mock.Setup(repository => repository.Update(It.IsAny<CpuMetric>())).Verifiable();
+
+            var result = _controller.Update(new CpuMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
+
             _mock.Verify(repository => repository.Update(It.IsAny<CpuMetric>()), Times.AtMostOnce());
+        }
+
+        [Fact]
+        public void Create_ShouldCall_Delete_From_Repository()
+        {
+            _mock.Setup(repository => repository.Delete(1)).Verifiable();
+
+            var result = _controller.Delete(1);
+
             _mock.Verify(repository => repository.Delete(1));
+        }
+
+        [Fact]
+        public void Create_ShouldCall_GetById_From_Repository()
+        {
+            _mock.Setup(repository => repository.GetById(1)).Verifiable();
+
+            var resultGetById = _controller.GetById(1);
+
             _mock.Verify(repository => repository.GetById(1));
         }
     }

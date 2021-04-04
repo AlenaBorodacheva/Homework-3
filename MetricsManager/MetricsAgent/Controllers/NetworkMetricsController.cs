@@ -33,24 +33,6 @@ namespace MetricsAgent.Controllers
             return Ok();
         }
 
-        [HttpGet("all")]
-        public IActionResult GetAll()
-        {
-            var metrics = _repository.GetAll();
-
-            var response = new AllNetworkMetricsResponse()
-            {
-                Metrics = new List<NetworkMetric>()
-            };
-
-            foreach (var metric in metrics)
-            {
-                response.Metrics.Add(new NetworkMetric { Time = metric.Time, Value = metric.Value, Id = metric.Id });
-            }
-
-            return Ok(response);
-        }
-
         [HttpPut("update")]
         public IActionResult Update([FromBody] NetworkMetricCreateRequest request)
         {

@@ -33,24 +33,6 @@ namespace MetricsAgent.Controllers
             return Ok();
         }
 
-        [HttpGet("all")]
-        public IActionResult GetAll()
-        {
-            var metrics = _repository.GetAll();
-
-            var response = new AllRamMetricsResponse()
-            {
-                Metrics = new List<RamMetric>()
-            };
-
-            foreach (var metric in metrics)
-            {
-                response.Metrics.Add(new RamMetric { Time = metric.Time, Value = metric.Value, Id = metric.Id });
-            }
-
-            return Ok(response);
-        }
-
         [HttpPut("update")]
         public IActionResult Update([FromBody] RamMetricCreateRequest request)
         {
@@ -149,7 +131,7 @@ namespace MetricsAgent.Controllers
                     string readQuery = "SELECT * FROM cpumetrics LIMIT 3";
 
                     // создаем массив, в который запишем объекты с данными из базы данных
-                    var returnArray = new NetworkMetric[3];
+                    var returnArray = new RamMetric[3];
                     // изменяем текст команды на наш запрос чтения
                     command.CommandText = readQuery;
 
@@ -162,7 +144,7 @@ namespace MetricsAgent.Controllers
                         while (reader.Read())
                         {
                             // создаем объект и записываем его в массив
-                            returnArray[counter] = new NetworkMetric
+                            returnArray[counter] = new RamMetric
                             {
                                 Id = reader.GetInt32(0), // читаем данные полученные из базы данных
                                 Value = reader.GetInt32(0), // преобразуя к целочисленному типу

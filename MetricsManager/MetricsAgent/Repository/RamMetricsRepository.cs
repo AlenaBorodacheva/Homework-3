@@ -67,34 +67,6 @@ namespace MetricsAgent
             cmd.ExecuteNonQuery();
         }
 
-        public IList<RamMetric> GetAll()
-        {
-            using var cmd = new SQLiteCommand(connection);
-
-            // прописываем в команду SQL запрос на получение всех данных из таблицы
-            cmd.CommandText = "SELECT * FROM cpumetrics";
-
-            var returnList = new List<RamMetric>();
-
-            using (SQLiteDataReader reader = cmd.ExecuteReader())
-            {
-                // пока есть что читать -- читаем
-                while (reader.Read())
-                {
-                    // добавляем объект в список возврата
-                    returnList.Add(new RamMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(0),
-                        // налету преобразуем прочитанные секунды в метку времени
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(0))
-                    });
-                }
-            }
-
-            return returnList;
-        }
-
         public RamMetric GetById(int id)
         {
             using var cmd = new SQLiteCommand(connection);
