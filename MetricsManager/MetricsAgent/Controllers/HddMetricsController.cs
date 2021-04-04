@@ -51,6 +51,34 @@ namespace MetricsAgent.Controllers
             return Ok(response);
         }
 
+        [HttpPut("update")]
+        public IActionResult Update([FromBody] HddMetricCreateRequest request)
+        {
+            _repository.Update(new HddMetric
+            {
+                Time = request.Time,
+                Value = request.Value
+            });
+
+            return Ok();
+        }
+
+        [HttpDelete("delete")]
+        public IActionResult Delete([FromBody] int id)
+        {
+            _repository.Delete(id);
+            return Ok();
+        }
+
+        [HttpGet("GetById")]
+        public IActionResult GetById([FromBody] int id)
+        {
+
+            var metrics = _repository.GetById(id);
+
+            return Ok(metrics);
+        }
+
         private readonly ILogger<HddMetricsController> _logger;
         public HddMetricsController(ILogger<HddMetricsController> logger)
         {

@@ -51,6 +51,34 @@ namespace MetricsAgent.Controllers
             return Ok(response);
         }
 
+        [HttpPut("update")]
+        public IActionResult Update([FromBody] RamMetricCreateRequest request)
+        {
+            _repository.Update(new RamMetric
+            {
+                Time = request.Time,
+                Value = request.Value
+            });
+
+            return Ok();
+        }
+
+        [HttpDelete("delete")]
+        public IActionResult Delete([FromBody] int id)
+        {
+            _repository.Delete(id);
+            return Ok();
+        }
+
+        [HttpGet("GetById")]
+        public IActionResult GetById([FromBody] int id)
+        {
+
+            var metrics = _repository.GetById(id);
+
+            return Ok(metrics);
+        }
+
         private readonly ILogger<RamMetricsController> _logger;
         public RamMetricsController(ILogger<RamMetricsController> logger)
         {
