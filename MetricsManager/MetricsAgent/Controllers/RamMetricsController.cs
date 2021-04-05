@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MetricsCommon;
 using Microsoft.Extensions.Logging;
 using System.Data.SQLite;
+using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -16,19 +17,18 @@ namespace MetricsAgent.Controllers
     {
         private IRamMetricsRepository _repository;
 
-        public RamMetricsController(IRamMetricsRepository repository)
+        private readonly IMapper _mapper;
+
+        public RamMetricsController(IRamMetricsRepository repository, IMapper mapper)
         {
-            this._repository = repository;
+            _repository = repository;
+            _mapper = mapper;
         }
 
         [HttpPost("create")]
         public IActionResult Create([FromBody] RamMetricCreateRequest request)
         {
-            _repository.Create(new RamMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            });
+            _repository.Create(_mapper.Map<RamMetric>(request));
 
             return Ok();
         }
@@ -36,11 +36,7 @@ namespace MetricsAgent.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromBody] RamMetricCreateRequest request)
         {
-            _repository.Update(new RamMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            });
+            _repository.Update(_mapper.Map<RamMetric>(request));
 
             return Ok();
         }
@@ -59,7 +55,7 @@ namespace MetricsAgent.Controllers
 
                 foreach (var metric in metrics)
                 {
-                    response.Metrics.Add(new RamMetric { Time = metric.Time, Value = metric.Value, Id = metric.Id });
+                    response.Metrics.Add(_mapper.Map<RamMetric>(metric));
                 }
 
                 return Ok(response);

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MetricsCommon;
 using Microsoft.Extensions.Logging;
 using System.Data.SQLite;
+using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -16,19 +17,18 @@ namespace MetricsAgent.Controllers
     {
         private IDotNetMetricsRepository _repository;
 
-        public DotNetMetricsController(IDotNetMetricsRepository repository)
+        private readonly IMapper _mapper;
+
+        public DotNetMetricsController(IDotNetMetricsRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         [HttpPost("create")]
         public IActionResult Create([FromBody] DotNetMetricCreateRequest request)
         {
-            _repository.Create(new DotNetMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            });
+            _repository.Create(_mapper.Map<DotNetMetric>(request));
 
             return Ok();
         }
@@ -36,11 +36,7 @@ namespace MetricsAgent.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromBody] DotNetMetricCreateRequest request)
         {
-            _repository.Update(new DotNetMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            });
+            _repository.Update(_mapper.Map<DotNetMetric>(request));
 
             return Ok();
         }
@@ -50,16 +46,16 @@ namespace MetricsAgent.Controllers
         {
             var metrics = _repository.GetAll();
 
-            if(metrics != null)
+            var response = new AllDotNetMetricsResponse()
             {
-                var response = new AllDotNetMetricsResponse()
-                {
-                    Metrics = new List<DotNetMetric>()
-                };
+                Metrics = new List<DotNetMetric>()
+            };
 
+            if (metrics != null)
+            {
                 foreach (var metric in metrics)
                 {
-                    response.Metrics.Add(new DotNetMetric { Time = metric.Time, Value = metric.Value, Id = metric.Id });
+                    response.Metrics.Add(_mapper.Map<DotNetMetric>(metric));
                 }
 
                 return Ok(response);

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MetricsCommon;
 using Microsoft.Extensions.Logging;
 using System.Data.SQLite;
+using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -16,19 +17,18 @@ namespace MetricsAgent.Controllers
     {
         private IHddMetricsRepository _repository;
 
-        public HddMetricsController(IHddMetricsRepository repository)
+        private readonly IMapper _mapper;
+
+        public HddMetricsController(IHddMetricsRepository repository, IMapper mapper)
         {
-            this._repository = repository;
+            _repository = repository;
+            _mapper = mapper;
         }
 
         [HttpPost("create")]
         public IActionResult Create([FromBody] HddMetricCreateRequest request)
         {
-            _repository.Create(new HddMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            });
+            _repository.Create(_mapper.Map<HddMetric>(request));
 
             return Ok();
         }
@@ -36,11 +36,7 @@ namespace MetricsAgent.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromBody] HddMetricCreateRequest request)
         {
-            _repository.Update(new HddMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            });
+            _repository.Update(_mapper.Map<HddMetric>(request));
 
             return Ok();
         }
@@ -59,7 +55,7 @@ namespace MetricsAgent.Controllers
 
                 foreach (var metric in metrics)
                 {
-                    response.Metrics.Add(new HddMetric { Time = metric.Time, Value = metric.Value, Id = metric.Id });
+                    response.Metrics.Add(_mapper.Map<HddMetric>(metric));
                 }
 
                 return Ok(response);

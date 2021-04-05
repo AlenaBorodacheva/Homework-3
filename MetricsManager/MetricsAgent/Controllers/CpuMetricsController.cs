@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MetricsCommon;
 using System.Data.SQLite;
 using Microsoft.Extensions.Logging;
+using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -14,21 +15,20 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class CpuMetricsController : ControllerBase
     {
-        private ICpuMetricsRepository _repository;
+        private readonly ICpuMetricsRepository _repository;
 
-        public CpuMetricsController(ICpuMetricsRepository repository)
+        private readonly IMapper _mapper;
+
+        public CpuMetricsController(ICpuMetricsRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         [HttpPost("create")]
         public IActionResult Create([FromBody] CpuMetricCreateRequest request)
         {
-            _repository.Create(new CpuMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            });
+            _repository.Create(_mapper.Map<CpuMetric>(request));
 
             return Ok();
         }
@@ -36,11 +36,7 @@ namespace MetricsAgent.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromBody] CpuMetricCreateRequest request)
         {
-            _repository.Update(new CpuMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            });
+            _repository.Update(_mapper.Map<CpuMetric>(request));
 
             return Ok();
         }
@@ -48,23 +44,22 @@ namespace MetricsAgent.Controllers
         [HttpGet("all")]
         public IActionResult GetAll()
         {
-            var metrics = _repository.GetAll();
-
-            if(metrics != null)
+            IList<CpuMetric> metrics = _repository.GetAll();
+            var response = new AllCpuMetricsResponse()
             {
-                var response = new AllCpuMetricsResponse()
-                {
-                    Metrics = new List<CpuMetric>()
-                };
+                Metrics = new List<CpuMetric>()
+            };
 
+            if (metrics != null)
+            {
                 foreach (var metric in metrics)
                 {
-                    response.Metrics.Add(new CpuMetric { Time = metric.Time, Value = metric.Value, Id = metric.Id });
+                    response.Metrics.Add(_mapper.Map<CpuMetric>(metric));
                 }
-
                 return Ok(response);
             }
-            return BadRequest();
+            else
+                return BadRequest();
         }
 
         [HttpDelete("delete")]
