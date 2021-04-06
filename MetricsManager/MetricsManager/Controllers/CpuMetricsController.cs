@@ -23,7 +23,8 @@ namespace MetricsManager.Controllers
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _logger.LogInformation("Сообщение из CpuMetricsController из параметра GetMetricsFromAgent");
+            _logger.LogInformation("Сообщение из CpuMetricsController из метода GetMetricsFromAgent");
+            _logger.LogInformation($"{agentId}, {fromTime}, {toTime}");
             return Ok();
         }
 
@@ -31,14 +32,16 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation("Сообщение из CpuMetricsController из параметра GetMetricsByPercentileFromAgent");
+            _logger.LogInformation("Сообщение из CpuMetricsController из метода GetMetricsByPercentileFromAgent");
+            _logger.LogInformation($"{agentId}, {fromTime}, {toTime}, {percentile}");
             return Ok();
         }
 
         [HttpGet("cluster/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _logger.LogInformation("Сообщение из CpuMetricsController из параметра GetMetricsFromAllCluster");
+            _logger.LogInformation("Сообщение из CpuMetricsController из метода GetMetricsFromAllCluster");
+            _logger.LogInformation($"{fromTime}, {toTime}");
             return Ok();
         }
 
@@ -46,21 +49,24 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation("Сообщение из CpuMetricsController из параметра GetMetricsByPercentileFromAllCluster");
+            _logger.LogInformation("Сообщение из CpuMetricsController из метода GetMetricsByPercentileFromAllCluster");
+            _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
             return Ok();
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
         public IActionResult GetMetricsByPercentile([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime, [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation("Сообщение из CpuMetricsController из параметра GetMetricsByPercentile");
+            _logger.LogInformation("Сообщение из CpuMetricsController из метода GetMetricsByPercentile");
+            _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
             return Ok();
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _logger.LogInformation("Сообщение из CpuMetricsController из параметра GetMetrics");
+            _logger.LogInformation("Сообщение из CpuMetricsController из метода GetMetrics");
+            _logger.LogInformation($"{fromTime}, {toTime}");
             return Ok();
         }
     }

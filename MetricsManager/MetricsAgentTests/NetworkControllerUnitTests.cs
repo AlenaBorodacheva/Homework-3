@@ -3,6 +3,7 @@ using Moq;
 using System;
 using Xunit;
 using MetricsAgent;
+using System.Collections.Generic;
 
 namespace MetricsAgentTests
 {
@@ -62,11 +63,11 @@ namespace MetricsAgentTests
         [Fact]
         public void Create_ShouldCall_GetAll_From_Repository()
         {
-            _mock.Setup(repository => repository.GetAll()).Verifiable();
+            _mock.Setup(repository => repository.GetAll()).Returns(new List<NetworkMetric>());
 
             var result = _controller.GetAll();
 
-            _mock.Verify(repository => repository.GetAll());
+            _mock.Setup(repository => repository.GetAll());
         }
     }
 }
