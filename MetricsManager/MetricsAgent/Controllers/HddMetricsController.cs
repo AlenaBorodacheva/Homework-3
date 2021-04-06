@@ -15,20 +15,32 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class HddMetricsController : ControllerBase
     {
-        private IHddMetricsRepository _repository;
+        private readonly IHddMetricsRepository _repository;
 
         private readonly IMapper _mapper;
 
+        private readonly ILogger<HddMetricsController> _logger;
+
+        public HddMetricsController(ILogger<HddMetricsController> logger)
+        {
+            _logger = logger;
+            _logger.LogDebug(1, "NLog встроен в HddMetricsController");
+        }
+        
         public HddMetricsController(IHddMetricsRepository repository, IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;
         }
 
+
         [HttpPost("create")]
         public IActionResult Create([FromBody] HddMetricCreateRequest request)
         {
             _repository.Create(_mapper.Map<HddMetric>(request));
+
+            _logger.LogInformation("Сообщение из HddMetricsController из метода Create");
+            _logger.LogInformation($"{request.Time}, {request.Value}");
 
             return Ok();
         }
@@ -38,6 +50,9 @@ namespace MetricsAgent.Controllers
         {
             _repository.Update(_mapper.Map<HddMetric>(request));
 
+            _logger.LogInformation("Сообщение из HddMetricsController из метода Update");
+            _logger.LogInformation($"{request.Time}, {request.Value}");
+
             return Ok();
         }
 
@@ -45,51 +60,49 @@ namespace MetricsAgent.Controllers
         public IActionResult GetAll()
         {
             var metrics = _repository.GetAll();
-
-            if(metrics != null)
+           
+            var response = new AllHddMetricsResponse()
             {
-                var response = new AllHddMetricsResponse()
-                {
-                    Metrics = new List<HddMetric>()
-                };
+                Metrics = new List<HddMetric>()
+            };
 
-                foreach (var metric in metrics)
-                {
-                    response.Metrics.Add(_mapper.Map<HddMetric>(metric));
-                }
-
-                return Ok(response);
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(_mapper.Map<HddMetric>(metric));
             }
-            return BadRequest();
+
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetAll");
+
+            return Ok(response);
         }
 
         [HttpDelete("delete")]
         public IActionResult Delete([FromBody] int id)
         {
             _repository.Delete(id);
+
+            _logger.LogInformation("Сообщение из HddMetricsController из метода Delete");
+            _logger.LogInformation($"{id}");
+
             return Ok();
         }
 
         [HttpGet("GetById")]
         public IActionResult GetById([FromBody] int id)
         {
-
             var metrics = _repository.GetById(id);
 
-            return Ok(metrics);
-        }
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetById");
+            _logger.LogInformation($"{id}");
 
-        private readonly ILogger<HddMetricsController> _logger;
-        public HddMetricsController(ILogger<HddMetricsController> logger)
-        {
-            _logger = logger;
-            _logger.LogDebug(1, "NLog встроен в HddMetricsController");
+            return Ok(metrics);
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _logger.LogInformation("Сообщение из HddMetricsController из параметра GetMetrics");
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetMetrics");
+            _logger.LogInformation($"{fromTime}, {toTime}");
             return Ok();
         }
 
@@ -97,14 +110,15 @@ namespace MetricsAgent.Controllers
         public IActionResult GetMetricsByPercentile([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation("Сообщение из HddMetricsController из параметра GetMetricsByPercentile");
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetMetricsByPercentile");
+            _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
             return Ok();
         }
 
         [HttpGet("left")]
         public IActionResult GetMetricsLeft()
         {
-            _logger.LogInformation("Сообщение из HddMetricsController из параметра GetMetricsLeft");
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetMetricsLeft");
             return Ok();
         }
 

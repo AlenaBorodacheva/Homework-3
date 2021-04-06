@@ -23,7 +23,8 @@ namespace MetricsManager.Controllers
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _logger.LogInformation("Сообщение из RamMetricsController из параметра GetMetricsFromAgent");
+            _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsFromAgent");
+            _logger.LogInformation($"{agentId}, {fromTime}, {toTime}");
             return Ok();
         }
 
@@ -31,14 +32,16 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation("Сообщение из RamMetricsController из параметра GetMetricsByPercentileFromAgent");
+            _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsByPercentileFromAgent");
+            _logger.LogInformation($"{agentId}, {fromTime}, {toTime}, {percentile}");
             return Ok();
         }
 
         [HttpGet("cluster/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _logger.LogInformation("Сообщение из RamMetricsController из параметра GetMetricsFromAllCluster");
+            _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsFromAllCluster");
+            _logger.LogInformation($"{fromTime}, {toTime}");
             return Ok();
         }
 
@@ -46,14 +49,15 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation("Сообщение из RamMetricsController из параметра GetMetricsByPercentileFromAllCluster");
+            _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsByPercentileFromAllCluster");
+            _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
             return Ok();
         }
 
         [HttpGet("available")]
         public IActionResult GetMetricsAvailable()
         {
-            _logger.LogInformation("Сообщение из RamMetricsController из параметра GetMetricsAvailable");
+            _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsAvailable");
             return Ok();
         }
     }

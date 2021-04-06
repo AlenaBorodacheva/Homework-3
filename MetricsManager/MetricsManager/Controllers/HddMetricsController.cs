@@ -23,7 +23,8 @@ namespace MetricsManager.Controllers
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _logger.LogInformation("Сообщение из HddMetricsController из параметра GetMetricsFromAgent");
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetMetricsFromAgent");
+            _logger.LogInformation($"{agentId}, {fromTime}, {toTime}");
             return Ok();
         }
 
@@ -31,14 +32,16 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation("Сообщение из HddMetricsController из параметра GetMetricsByPercentileFromAgent");
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetMetricsByPercentileFromAgent");
+            _logger.LogInformation($"{agentId}, {fromTime}, {toTime}, {percentile}");
             return Ok();
         }
 
         [HttpGet("cluster/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _logger.LogInformation("Сообщение из HddMetricsController из параметра GetMetricsFromAllCluster");
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetMetricsFromAllCluster");
+            _logger.LogInformation($"{fromTime}, {toTime}");
             return Ok();
         }
 
@@ -46,14 +49,15 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation("Сообщение из HddMetricsController из параметра GetMetricsByPercentileFromAllCluster");
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetMetricsByPercentileFromAllCluster");
+            _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
             return Ok();
         }
 
         [HttpGet("left")]
         public IActionResult GetMetricsLeft()
         {
-            _logger.LogInformation("Сообщение из HddMetricsController из параметра GetMetricsLeft");
+            _logger.LogInformation("Сообщение из HddMetricsController из метода GetMetricsLeft");
             return Ok();
         }
     }
