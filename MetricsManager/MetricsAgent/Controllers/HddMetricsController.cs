@@ -20,15 +20,12 @@ namespace MetricsAgent.Controllers
         private readonly IMapper _mapper;
 
         private readonly ILogger<HddMetricsController> _logger;
-
-        public HddMetricsController(ILogger<HddMetricsController> logger)
+        
+        public HddMetricsController(IHddMetricsRepository repository, IMapper mapper, ILogger<HddMetricsController> logger)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в HddMetricsController");
-        }
-        
-        public HddMetricsController(IHddMetricsRepository repository, IMapper mapper)
-        {
+
             _repository = repository;
             _mapper = mapper;
         }

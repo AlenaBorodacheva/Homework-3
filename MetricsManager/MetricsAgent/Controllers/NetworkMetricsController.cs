@@ -21,14 +21,11 @@ namespace MetricsAgent.Controllers
 
         private readonly ILogger<NetworkMetricsController> _logger;
 
-        public NetworkMetricsController(ILogger<NetworkMetricsController> logger)
+        public NetworkMetricsController(INetworkMetricsRepository repository, IMapper mapper, ILogger<NetworkMetricsController> logger)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в NetworkMetricsController");
-        }
 
-        public NetworkMetricsController(INetworkMetricsRepository repository, IMapper mapper)
-        {
             _repository = repository;
             _mapper = mapper;
         }

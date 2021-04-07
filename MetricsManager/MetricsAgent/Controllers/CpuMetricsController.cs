@@ -21,14 +21,11 @@ namespace MetricsAgent.Controllers
 
         private readonly ILogger<CpuMetricsController> _logger;
 
-        public CpuMetricsController(ILogger<CpuMetricsController> logger)
+        public CpuMetricsController(ICpuMetricsRepository repository, IMapper mapper, ILogger<CpuMetricsController> logger)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в CpuMetricsController");
-        }
 
-        public CpuMetricsController(ICpuMetricsRepository repository, IMapper mapper)
-        {
             _repository = repository;
             _mapper = mapper;
         }

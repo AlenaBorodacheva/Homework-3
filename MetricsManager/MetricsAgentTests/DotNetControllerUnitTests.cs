@@ -4,6 +4,8 @@ using System;
 using Xunit;
 using MetricsAgent;
 using System.Collections.Generic;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgentTests
 {
@@ -11,63 +13,71 @@ namespace MetricsAgentTests
     {
         private DotNetMetricsController _controller;
 
-        private Mock<IDotNetMetricsRepository> _mock;
+        private Mock<IDotNetMetricsRepository> _mockRepository;
+
+        private Mock<IMapper> _mockMapper;
+
+        private Mock<ILogger<DotNetMetricsController>> _logger;
 
         public DotNetControllerUnitTests()
         {
-            _mock = new Mock<IDotNetMetricsRepository>();
+            _mockRepository = new Mock<IDotNetMetricsRepository>();
 
-            _controller = new DotNetMetricsController(_mock.Object);
+            _mockMapper = new Mock<IMapper>();
+
+            _logger = new Mock<ILogger<DotNetMetricsController>>();
+
+            _controller = new DotNetMetricsController(_mockRepository.Object, _mockMapper.Object, _logger.Object);
         }
 
         [Fact]
         public void Create_ShouldCall_Create_From_Repository()
         {
-            _mock.Setup(repository => repository.Create(It.IsAny<DotNetMetric>())).Verifiable();
+            _mockRepository.Setup(repository => repository.Create(It.IsAny<DotNetMetric>())).Verifiable();
            
             var result = _controller.Create(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
-            
-            _mock.Verify(repository => repository.Create(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
+
+            _mockRepository.Verify(repository => repository.Create(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
         }
 
         [Fact]
         public void Create_ShouldCall_Update_From_Repository()
         {
-            _mock.Setup(repository => repository.Update(It.IsAny<DotNetMetric>())).Verifiable();
+            _mockRepository.Setup(repository => repository.Update(It.IsAny<DotNetMetric>())).Verifiable();
 
             var result = _controller.Update(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
 
-            _mock.Verify(repository => repository.Update(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
+            _mockRepository.Verify(repository => repository.Update(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
         }
 
         [Fact]
         public void Create_ShouldCall_Delete_From_Repository()
         {
-            _mock.Setup(repository => repository.Delete(1)).Verifiable();
+            _mockRepository.Setup(repository => repository.Delete(1)).Verifiable();
 
             var result = _controller.Delete(1);
 
-            _mock.Verify(repository => repository.Delete(1));
+            _mockRepository.Verify(repository => repository.Delete(1));
         }
 
         [Fact]
         public void Create_ShouldCall_GetById_From_Repository()
         {
-            _mock.Setup(repository => repository.GetById(1)).Verifiable();
+            _mockRepository.Setup(repository => repository.GetById(1)).Verifiable();
 
             var result = _controller.GetById(1);
 
-            _mock.Verify(repository => repository.GetById(1));
+            _mockRepository.Verify(repository => repository.GetById(1));
         }
 
         [Fact]
         public void Create_ShouldCall_GetAll_From_Repository()
         {
-            _mock.Setup(repository => repository.GetAll()).Returns(new List<DotNetMetric>());
+            _mockRepository.Setup(repository => repository.GetAll()).Returns(new List<DotNetMetric>());
 
             var result = _controller.GetAll();
 
-            _mock.Verify(repository => repository.GetAll());
+            _mockRepository.Verify(repository => repository.GetAll());
         }
     }
 }

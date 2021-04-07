@@ -21,14 +21,11 @@ namespace MetricsAgent.Controllers
 
         private readonly ILogger<DotNetMetricsController> _logger;
 
-        public DotNetMetricsController(ILogger<DotNetMetricsController> logger)
+        public DotNetMetricsController(IDotNetMetricsRepository repository, IMapper mapper, ILogger<DotNetMetricsController> logger)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в DotNetMetricsController");
-        }
 
-        public DotNetMetricsController(IDotNetMetricsRepository repository, IMapper mapper)
-        {
             _repository = repository;
             _mapper = mapper;
         }

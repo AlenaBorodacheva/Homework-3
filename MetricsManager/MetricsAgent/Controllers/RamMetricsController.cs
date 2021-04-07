@@ -21,14 +21,11 @@ namespace MetricsAgent.Controllers
 
         private readonly ILogger<RamMetricsController> _logger;
 
-        public RamMetricsController(ILogger<RamMetricsController> logger)
+        public RamMetricsController(IRamMetricsRepository repository, IMapper mapper, ILogger<RamMetricsController> logger)
         {
             _logger = logger;
             _logger.LogDebug(1, "NLog встроен в RamMetricsController");
-        }
 
-        public RamMetricsController(IRamMetricsRepository repository, IMapper mapper)
-        {
             _repository = repository;
             _mapper = mapper;
         }
