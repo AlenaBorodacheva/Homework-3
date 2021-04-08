@@ -77,7 +77,7 @@ namespace MetricsAgent
                 // читаем при помощи Query и в шаблон подставляем тип данных
                 // объект которого Dapper сам и заполнит его поля
                 // в соответсвии с названиями колонок
-                return connection.Query<CpuMetric>("SELECT Id, Time, Value FROM cpumetrics").ToList();
+                return connection.Query<CpuMetric>("SELECT Id, Time, Value FROM cpumetrics WHERE time>@fromTime AND time<@toTime").ToList();
             }
         }
 
