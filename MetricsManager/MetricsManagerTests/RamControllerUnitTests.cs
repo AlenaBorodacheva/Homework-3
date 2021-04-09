@@ -3,14 +3,21 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
 using MetricsCommon;
+using Microsoft.Extensions.Logging;
+using Moq;
+
 namespace MetricsManagerTests
 {
     public class RamControllerUnitTests
     {
-        private RamMetricsController controller;
+        private RamMetricsController _controller;
+
+        private Mock<ILogger<RamMetricsController>> _logger;
+
         public RamControllerUnitTests()
         {
-            controller = new RamMetricsController();
+            _logger = new Mock<ILogger<RamMetricsController>>();
+            _controller = new RamMetricsController(_logger.Object);
         }
 
         [Fact]
@@ -23,11 +30,11 @@ namespace MetricsManagerTests
             var percentile = Percentile.P99;
 
             //Act
-            var getMetricsFromAgentResult = controller.GetMetricsFromAgent(agentId, fromTime, toTime);
-            var getMetricsByPercentileFromAgentResult = controller.GetMetricsByPercentileFromAgent(agentId, fromTime, toTime, percentile);
-            var getMetricsFromAllClusterResult = controller.GetMetricsFromAllCluster(fromTime, toTime);
-            var getMetricsByPercentileFromAllClusterResult = controller.GetMetricsByPercentileFromAllCluster(fromTime, toTime, percentile);
-            var getMetricsAvailableResult = controller.GetMetricsAvailable();
+            var getMetricsFromAgentResult = _controller.GetMetricsFromAgent(agentId, fromTime, toTime);
+            var getMetricsByPercentileFromAgentResult = _controller.GetMetricsByPercentileFromAgent(agentId, fromTime, toTime, percentile);
+            var getMetricsFromAllClusterResult = _controller.GetMetricsFromAllCluster(fromTime, toTime);
+            var getMetricsByPercentileFromAllClusterResult = _controller.GetMetricsByPercentileFromAllCluster(fromTime, toTime, percentile);
+            var getMetricsAvailableResult = _controller.GetMetricsAvailable();
 
             // Assert
             _ = Assert.IsAssignableFrom<IActionResult>(getMetricsFromAgentResult);

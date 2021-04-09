@@ -3,15 +3,21 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
 using MetricsCommon;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace MetricsManagerTests
 {
     public class AgentsControllerUnitTests
     {
-        private AgentsController controller;
+        private AgentsController _controller;
+
+        private Mock<ILogger<AgentsController>> _logger;
+
         public AgentsControllerUnitTests()
         {
-            controller = new AgentsController();
+            _logger = new Mock<ILogger<AgentsController>>();
+            _controller = new AgentsController(_logger.Object);
         }
 
         [Fact]
@@ -22,10 +28,10 @@ namespace MetricsManagerTests
             var agentId = 1;
 
             //Act
-            var registerAgentResult = controller.RegisterAgent(agentInfo);
-            var enableAgentByIdResult = controller.EnableAgentById(agentId);
-            var disableAgentByIdResult = controller.DisableAgentById(agentId);
-            var listOfRegisteredObjectsResult = controller.ListOfRegisteredObjects();
+            var registerAgentResult = _controller.RegisterAgent(agentInfo);
+            var enableAgentByIdResult = _controller.EnableAgentById(agentId);
+            var disableAgentByIdResult = _controller.DisableAgentById(agentId);
+            var listOfRegisteredObjectsResult = _controller.ListOfRegisteredObjects();
 
             // Assert
             _ = Assert.IsAssignableFrom<IActionResult>(registerAgentResult);
