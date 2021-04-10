@@ -34,7 +34,7 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] NetworkMetricCreateRequest request)
         {
-            _repository.Create(_mapper.Map<NetworkMetric>(request));
+            _repository.Create(_mapper.Map<NetworkMetricDto>(request));
 
             _logger.LogInformation("Сообщение из NetworkMetricsController из метода Create");
             _logger.LogInformation($"{request.Time}, {request.Value}");
@@ -45,7 +45,7 @@ namespace MetricsAgent.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromBody] NetworkMetricCreateRequest request)
         {
-            _repository.Update(_mapper.Map<NetworkMetric>(request));
+            _repository.Update(_mapper.Map<NetworkMetricDto>(request));
 
             _logger.LogInformation("Сообщение из NetworkMetricsController из метода Update");
             _logger.LogInformation($"{request.Time}, {request.Value}");
@@ -60,12 +60,12 @@ namespace MetricsAgent.Controllers
             
             var response = new AllNetworkMetricsResponse()
             {
-                Metrics = new List<NetworkMetric>()
+                Metrics = new List<NetworkMetricDto>()
             };
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(_mapper.Map<NetworkMetric>(metric));
+                response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
             }
 
             _logger.LogInformation("Сообщение из NetworkMetricsController из метода GetAll");
@@ -102,6 +102,10 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation("Сообщение из NetworkMetricsController из метода GetMetricsByPercentile");
             _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
+
+            var metrics = _repository.GetMetrics(fromTime, toTime);
+
+            //метод - заглушка
             return Ok();
         }
 
@@ -110,7 +114,20 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation("Сообщение из NetworkMetricsController из метода GetMetrics");
             _logger.LogInformation($"{fromTime}, {toTime}");
-            return Ok();
+
+            var metrics = _repository.GetMetrics(fromTime, toTime);
+
+            var response = new AllNetworkMetricsResponse()
+            {
+                Metrics = new List<NetworkMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
+            }
+
+            return Ok(metrics);
         }
 
         [HttpGet("sql-read-write-test")]
@@ -154,7 +171,7 @@ namespace MetricsAgent.Controllers
                     string readQuery = "SELECT * FROM cpumetrics LIMIT 3";
 
                     // создаем массив, в который запишем объекты с данными из базы данных
-                    var returnArray = new NetworkMetric[3];
+                    var returnArray = new NetworkMetricDto[3];
                     // изменяем текст команды на наш запрос чтения
                     command.CommandText = readQuery;
 
@@ -167,7 +184,7 @@ namespace MetricsAgent.Controllers
                         while (reader.Read())
                         {
                             // создаем объект и записываем его в массив
-                            returnArray[counter] = new NetworkMetric
+                            returnArray[counter] = new NetworkMetricDto
                             {
                                 Id = reader.GetInt32(0), // читаем данные полученные из базы данных
                                 Value = reader.GetInt32(0), // преобразуя к целочисленному типу

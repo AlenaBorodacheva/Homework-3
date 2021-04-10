@@ -34,7 +34,7 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] CpuMetricCreateRequest request)
         {
-            _repository.Create(_mapper.Map<CpuMetric>(request));
+            _repository.Create(_mapper.Map<CpuMetricDto>(request));
 
             _logger.LogInformation("Сообщение из CpuMetricsController из метода Create");
             _logger.LogInformation($"{request.Time}, {request.Value}");
@@ -45,7 +45,7 @@ namespace MetricsAgent.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromBody] CpuMetricCreateRequest request)
         {
-            _repository.Update(_mapper.Map<CpuMetric>(request));
+            _repository.Update(_mapper.Map<CpuMetricDto>(request));
 
             _logger.LogInformation("Сообщение из CpuMetricsController из метода Update");
             _logger.LogInformation($"{request.Time}, {request.Value}");
@@ -56,15 +56,15 @@ namespace MetricsAgent.Controllers
         [HttpGet("all")]
         public IActionResult GetAll()
         {
-            IList<CpuMetric> metrics = _repository.GetAll();
+            IList<CpuMetricDto> metrics = _repository.GetAll();
             var response = new AllCpuMetricsResponse()
             {
-                Metrics = new List<CpuMetric>()
+                Metrics = new List<CpuMetricDto>()
             };
             
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(_mapper.Map<CpuMetric>(metric));
+                response.Metrics.Add(_mapper.Map<CpuMetricDto>(metric));
             }
 
             _logger.LogInformation("Сообщение из CpuMetricsController из метода GetAll");
@@ -100,6 +100,10 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation("Сообщение из CpuMetricsController из метода GetMetricsByPercentile");
             _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
+
+            var metrics = _repository.GetMetrics(fromTime, toTime);
+
+            // метод - заглушка
             return Ok();
         }
 
@@ -108,7 +112,19 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation("Сообщение из CpuMetricsController из метода GetMetrics");
             _logger.LogInformation($"{fromTime}, {toTime}");
-            return Ok();
+
+            IList<CpuMetricDto> metrics = _repository.GetMetrics(fromTime, toTime);
+            var response = new AllCpuMetricsResponse()
+            {
+                Metrics = new List<CpuMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(_mapper.Map<CpuMetricDto>(metric));
+            }
+
+            return Ok(metrics);
         }
 
         [HttpGet("sql-test")]
@@ -169,7 +185,7 @@ namespace MetricsAgent.Controllers
                     string readQuery = "SELECT * FROM cpumetrics LIMIT 3";
 
                     // создаем массив, в который запишем объекты с данными из базы данных
-                    var returnArray = new CpuMetric[3];
+                    var returnArray = new CpuMetricDto[3];
                     // изменяем текст команды на наш запрос чтения
                     command.CommandText = readQuery;
 
@@ -182,7 +198,7 @@ namespace MetricsAgent.Controllers
                         while (reader.Read())
                         {
                             // создаем объект и записываем его в массив
-                            returnArray[counter] = new CpuMetric
+                            returnArray[counter] = new CpuMetricDto
                             {
                                 Id = reader.GetInt32(0), // читаем данные полученные из базы данных
                                 Value = reader.GetInt32(0), // преобразуя к целочисленному типу

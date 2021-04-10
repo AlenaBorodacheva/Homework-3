@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MetricsAgent
 {
-    public class CpuMetric
+    public class CpuMetricDto
     {
         public int Id { get; set; }
         public int Value { get; set; }
@@ -20,6 +20,6 @@ namespace MetricsAgent
 
     public class AllCpuMetricsResponse
     {
-        public List<CpuMetric> Metrics { get; set; }
+        public List<CpuMetricDto> Metrics { get; set; }
     }
 }

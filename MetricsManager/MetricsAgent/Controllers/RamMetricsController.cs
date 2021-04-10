@@ -34,7 +34,7 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] RamMetricCreateRequest request)
         {
-            _repository.Create(_mapper.Map<RamMetric>(request));
+            _repository.Create(_mapper.Map<RamMetricDto>(request));
 
             _logger.LogInformation("Сообщение из RamMetricsController из метода Create");
             _logger.LogInformation($"{request.Time}, {request.Value}");
@@ -45,7 +45,7 @@ namespace MetricsAgent.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromBody] RamMetricCreateRequest request)
         {
-            _repository.Update(_mapper.Map<RamMetric>(request));
+            _repository.Update(_mapper.Map<RamMetricDto>(request));
 
             _logger.LogInformation("Сообщение из RamMetricsController из метода Update");
             _logger.LogInformation($"{request.Time}, {request.Value}");
@@ -60,12 +60,12 @@ namespace MetricsAgent.Controllers
 
             var response = new AllRamMetricsResponse()
             {
-                Metrics = new List<RamMetric>()
+                Metrics = new List<RamMetricDto>()
             };
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(_mapper.Map<RamMetric>(metric));
+                response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
             }
 
             _logger.LogInformation("Сообщение из RamMetricsController из метода GetAll");
@@ -101,7 +101,20 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetrics");
             _logger.LogInformation($"{fromTime}, {toTime}");
-            return Ok();
+
+            var metrics = _repository.GetMetrics(fromTime, toTime);
+
+            var response = new AllRamMetricsResponse()
+            {
+                Metrics = new List<RamMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
+            }
+
+            return Ok(metrics);
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
@@ -110,6 +123,10 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsByPercentile");
             _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
+
+            var metrics = _repository.GetMetrics(fromTime, toTime);
+
+            //метод - заглушка
             return Ok();
         }
 
@@ -117,6 +134,8 @@ namespace MetricsAgent.Controllers
         public IActionResult GetMetricsAvailable()
         {
             _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsAvailable");
+
+            //метод - заглушка
             return Ok();
         }
 
@@ -161,7 +180,7 @@ namespace MetricsAgent.Controllers
                     string readQuery = "SELECT * FROM cpumetrics LIMIT 3";
 
                     // создаем массив, в который запишем объекты с данными из базы данных
-                    var returnArray = new RamMetric[3];
+                    var returnArray = new RamMetricDto[3];
                     // изменяем текст команды на наш запрос чтения
                     command.CommandText = readQuery;
 
@@ -174,7 +193,7 @@ namespace MetricsAgent.Controllers
                         while (reader.Read())
                         {
                             // создаем объект и записываем его в массив
-                            returnArray[counter] = new RamMetric
+                            returnArray[counter] = new RamMetricDto
                             {
                                 Id = reader.GetInt32(0), // читаем данные полученные из базы данных
                                 Value = reader.GetInt32(0), // преобразуя к целочисленному типу

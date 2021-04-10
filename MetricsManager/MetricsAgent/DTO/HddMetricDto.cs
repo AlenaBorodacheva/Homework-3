@@ -5,21 +5,21 @@ using System.Threading.Tasks;
 
 namespace MetricsAgent
 {
-    public class DotNetMetric
+    public class HddMetricDto
     {
         public int Id { get; set; }
         public int Value { get; set; }
         public TimeSpan Time { get; set; }
     }
 
-    public class DotNetMetricCreateRequest
+    public class HddMetricCreateRequest
     {
         public TimeSpan Time { get; set; }
         public int Value { get; set; }
     }
 
-    public class AllDotNetMetricsResponse
+    public class AllHddMetricsResponse
     {
-        public List<DotNetMetric> Metrics { get; set; }
+        public List<HddMetricDto> Metrics { get; set; }
     }
 }
