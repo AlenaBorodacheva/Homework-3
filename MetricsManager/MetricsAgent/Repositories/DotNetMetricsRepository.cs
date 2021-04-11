@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using MetricsCommon;
 using System.Data.SQLite;
 using Dapper;
 
@@ -9,7 +9,7 @@ namespace MetricsAgent
 {
     // маркировочный интерфейс
     // необходим, чтобы проверить работу репозитория на тесте-заглушке
-    public interface IDotNetMetricsRepository : IRepository<DotNetMetric>
+    public interface IDotNetMetricsRepository : IRepository<DotNetMetricDto>
     {
     }
 
@@ -25,7 +25,7 @@ namespace MetricsAgent
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        public void Create(DotNetMetric item)
+        public void Create(DotNetMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -56,7 +56,7 @@ namespace MetricsAgent
             }
         }
 
-        public void Update(DotNetMetric item)
+        public void Update(DotNetMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -70,23 +70,32 @@ namespace MetricsAgent
             }
         }
 
-        public IList<DotNetMetric> GetAll()
+        public IList<DotNetMetricDto> GetAll()
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 // читаем при помощи Query и в шаблон подставляем тип данных
                 // объект которого Dapper сам и заполнит его поля
                 // в соответсвии с названиями колонок
-                return connection.Query<DotNetMetric>("SELECT Id, Time, Value FROM dotnetmetrics").ToList();
+                return connection.Query<DotNetMetricDto>("SELECT Id, Time, Value FROM dotnetmetrics").ToList();
             }
         }
 
-        public DotNetMetric GetById(int id)
+        public DotNetMetricDto GetById(int id)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.QuerySingle<DotNetMetric>("SELECT Id, Time, Value FROM dotnetmetrics WHERE id=@id",
+                return connection.QuerySingle<DotNetMetricDto>("SELECT Id, Time, Value FROM dotnetmetrics WHERE id=@id",
                     new { id = id });
+            }
+        }
+
+        public IList<DotNetMetricDto> GetMetrics(TimeSpan fromTime, TimeSpan toTime)
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<DotNetMetricDto>("SELECT Id, Time, Value FROM dotnetmetrics WHERE time>@fromTime AND time<@toTime",
+                    new { fromTime = fromTime, toTime = toTime }).ToList();
             }
         }
     }

@@ -9,7 +9,7 @@ namespace MetricsAgent
 {
     // маркировочный интерфейс
     // необходим, чтобы проверить работу репозитория на тесте-заглушке
-    public interface IRamMetricsRepository : IRepository<RamMetric>
+    public interface IRamMetricsRepository : IRepository<RamMetricDto>
     {
     }
 
@@ -25,7 +25,7 @@ namespace MetricsAgent
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        public void Create(RamMetric item)
+        public void Create(RamMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -56,7 +56,7 @@ namespace MetricsAgent
             }
         }
 
-        public void Update(RamMetric item)
+        public void Update(RamMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -70,23 +70,32 @@ namespace MetricsAgent
             }
         }
 
-        public IList<RamMetric> GetAll()
+        public IList<RamMetricDto> GetAll()
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 // читаем при помощи Query и в шаблон подставляем тип данных
                 // объект которого Dapper сам и заполнит его поля
                 // в соответсвии с названиями колонок
-                return connection.Query<RamMetric>("SELECT Id, Time, Value FROM rammetrics").ToList();
+                return connection.Query<RamMetricDto>("SELECT Id, Time, Value FROM rammetrics").ToList();
             }
         }
 
-        public RamMetric GetById(int id)
+        public RamMetricDto GetById(int id)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.QuerySingle<RamMetric>("SELECT Id, Time, Value FROM rammetrics WHERE id=@id",
+                return connection.QuerySingle<RamMetricDto>("SELECT Id, Time, Value FROM rammetrics WHERE id=@id",
                     new { id = id });
+            }
+        }
+
+        public IList<RamMetricDto> GetMetrics(TimeSpan fromTime, TimeSpan toTime)
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<RamMetricDto>("SELECT Id, Time, Value FROM rammetrics WHERE time>@fromTime AND time<@toTime",
+                    new { fromTime = fromTime, toTime = toTime }).ToList();
             }
         }
     }

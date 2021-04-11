@@ -3,15 +3,21 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
 using MetricsCommon;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace MetricsManagerTests
 {
     public class DotNetControllerUnitTests
     {
-        private DotNetMetricsController controller;
+        private DotNetMetricsController _controller;
+
+        private Mock<ILogger<DotNetMetricsController>> _logger;
+
         public DotNetControllerUnitTests()
         {
-            controller = new DotNetMetricsController();
+            _logger = new Mock<ILogger<DotNetMetricsController>>();
+            _controller = new DotNetMetricsController(_logger.Object);
         }
 
         [Fact]
@@ -24,11 +30,11 @@ namespace MetricsManagerTests
             var percentile = Percentile.P99;
 
             //Act
-            var getMetricsFromAgentResult = controller.GetMetricsFromAgent(agentId, fromTime, toTime);
-            var getMetricsByPercentileFromAgentResult = controller.GetMetricsByPercentileFromAgent(agentId, fromTime, toTime, percentile);
-            var getMetricsFromAllClusterResult = controller.GetMetricsFromAllCluster(fromTime, toTime);
-            var getMetricsByPercentileFromAllClusterResult = controller.GetMetricsByPercentileFromAllCluster(fromTime, toTime, percentile);
-            var getMetricsFromErrorsCountResult = controller.GetMetricsFromErrorsCount(fromTime, toTime);
+            var getMetricsFromAgentResult = _controller.GetMetricsFromAgent(agentId, fromTime, toTime);
+            var getMetricsByPercentileFromAgentResult = _controller.GetMetricsByPercentileFromAgent(agentId, fromTime, toTime, percentile);
+            var getMetricsFromAllClusterResult = _controller.GetMetricsFromAllCluster(fromTime, toTime);
+            var getMetricsByPercentileFromAllClusterResult = _controller.GetMetricsByPercentileFromAllCluster(fromTime, toTime, percentile);
+            var getMetricsFromErrorsCountResult = _controller.GetMetricsFromErrorsCount(fromTime, toTime);
 
             // Assert
             _ = Assert.IsAssignableFrom<IActionResult>(getMetricsFromAgentResult);

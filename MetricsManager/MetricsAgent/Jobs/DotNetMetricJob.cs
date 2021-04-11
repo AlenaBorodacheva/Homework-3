@@ -1,39 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Quartz;
-using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MetricsAgent.Jobs
 {
-    public class DotNetMetricJob
+    public class DotNetMetricJob : IJob
     {
         private readonly IServiceProvider _provider;
+        private readonly IDotNetMetricsRepository _repository;
 
-        private IDotNetMetricsRepository _repository;
-
-        private PerformanceCounter _DotNetCounter;
+        private PerformanceCounter _dotnetCounter;
 
         public DotNetMetricJob(IServiceProvider provider)
         {
             _provider = provider;
             _repository = _provider.GetService<IDotNetMetricsRepository>();
-            _DotNetCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total"); 
+            _dotnetCounter = new PerformanceCounter("Memory", "Private Bytes"); // очень не уверена, что правильно
         }
 
         public Task Execute(IJobExecutionContext context)
         {
-            // получаем значение занятости DotNet
-            var DotNetUsageInPercents = Convert.ToInt32(_DotNetCounter.NextValue());
+            var dotnetUsageInPercents = Convert.ToInt32(_dotnetCounter.NextValue());
 
-            // узнаем когда мы сняли значение метрики.
             var time = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
-            // теперь можно записать что-то при помощи репозитория
-
-            _repository.Create(new DotNetMetric { Time = time, Value = DotNetUsageInPercents });
+            _repository.Create(new DotNetMetricDto { Time = time, Value = dotnetUsageInPercents });
 
             return Task.CompletedTask;
         }

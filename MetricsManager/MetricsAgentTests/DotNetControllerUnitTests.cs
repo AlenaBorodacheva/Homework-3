@@ -6,6 +6,8 @@ using MetricsAgent;
 using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using AutoFixture;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MetricsAgentTests
 {
@@ -33,21 +35,21 @@ namespace MetricsAgentTests
         [Fact]
         public void Create_ShouldCall_Create_From_Repository()
         {
-            _mockRepository.Setup(repository => repository.Create(It.IsAny<DotNetMetric>())).Verifiable();
+            _mockRepository.Setup(repository => repository.Create(It.IsAny<DotNetMetricDto>())).Verifiable();
            
             var result = _controller.Create(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
 
-            _mockRepository.Verify(repository => repository.Create(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
+            _mockRepository.Verify(repository => repository.Create(It.IsAny<DotNetMetricDto>()), Times.AtMostOnce());
         }
 
         [Fact]
         public void Create_ShouldCall_Update_From_Repository()
         {
-            _mockRepository.Setup(repository => repository.Update(It.IsAny<DotNetMetric>())).Verifiable();
+            _mockRepository.Setup(repository => repository.Update(It.IsAny<DotNetMetricDto>())).Verifiable();
 
             var result = _controller.Update(new DotNetMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
 
-            _mockRepository.Verify(repository => repository.Update(It.IsAny<DotNetMetric>()), Times.AtMostOnce());
+            _mockRepository.Verify(repository => repository.Update(It.IsAny<DotNetMetricDto>()), Times.AtMostOnce());
         }
 
         [Fact]
@@ -73,11 +75,35 @@ namespace MetricsAgentTests
         [Fact]
         public void Create_ShouldCall_GetAll_From_Repository()
         {
-            _mockRepository.Setup(repository => repository.GetAll()).Returns(new List<DotNetMetric>());
+            var fixture = new Fixture();
+            var returnList = fixture.Create<List<DotNetMetricDto>>();
 
-            var result = _controller.GetAll();
+            _mockRepository.Setup(repository => repository.GetAll()).Returns(returnList);
+
+            var result = (OkObjectResult)_controller.GetAll();
+            var actualResult = (List<DotNetMetricDto>)result.Value;
 
             _mockRepository.Verify(repository => repository.GetAll());
+            Assert.Equal(returnList[0].Id, actualResult[0].Id);
+        }
+
+        [Fact]
+        public void Call_GetMetrics_From_Repository()
+        {
+            var fixture = new Fixture();
+            var returnList = fixture.Create<List<DotNetMetricDto>>();
+
+            _mockRepository.Setup(repository => repository.GetMetrics(It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>()))
+                .Returns(returnList);
+
+            var fromTime = TimeSpan.FromSeconds(1000);
+            var toTime = TimeSpan.FromSeconds(2000);
+
+            var result = (OkObjectResult)_controller.GetMetrics(fromTime, toTime);
+            var actualResult = (List<DotNetMetricDto>)result.Value;
+
+            _mockRepository.Verify(repository => repository.GetMetrics(It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>()));
+            Assert.Equal(returnList[0].Id, actualResult[0].Id);
         }
     }
 }

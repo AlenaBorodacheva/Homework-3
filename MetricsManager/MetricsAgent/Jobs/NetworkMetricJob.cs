@@ -1,39 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Quartz;
-using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MetricsAgent.Jobs
 {
-    public class NetworkMetricJob
+    public class NetworkMetricJob : IJob
     {
         private readonly IServiceProvider _provider;
+        private readonly INetworkMetricsRepository _repository;
 
-        private INetworkMetricsRepository _repository;
-
-        private PerformanceCounter _NetworkCounter;
+        private PerformanceCounter _networkCounter;
 
         public NetworkMetricJob(IServiceProvider provider)
         {
             _provider = provider;
             _repository = _provider.GetService<INetworkMetricsRepository>();
-            _NetworkCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            _networkCounter = new PerformanceCounter("Memory", "% Time in GC"); // очень не уверена, что правильно
         }
 
         public Task Execute(IJobExecutionContext context)
         {
-            // получаем значение занятости DotNet
-            var NetworkUsageInPercents = Convert.ToInt32(_NetworkCounter.NextValue());
+            var networkUsageInPercents = Convert.ToInt32(_networkCounter.NextValue());
 
-            // узнаем когда мы сняли значение метрики.
             var time = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
-            // теперь можно записать что-то при помощи репозитория
-
-            _repository.Create(new NetworkMetric { Time = time, Value = NetworkUsageInPercents });
+            _repository.Create(new NetworkMetricDto { Time = time, Value = networkUsageInPercents });
 
             return Task.CompletedTask;
         }

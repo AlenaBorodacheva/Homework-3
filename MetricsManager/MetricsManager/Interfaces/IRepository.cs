@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MetricsCommon;
+using System.Threading.Tasks;
 
-namespace MetricsAgent
+namespace MetricsManager
 {
     public interface IRepository<T> where T : class
     {
@@ -17,6 +17,6 @@ namespace MetricsAgent
 
         void Delete(int id);
 
-        IList<T> GetMetrics(TimeSpan fromTime, TimeSpan toTime);
+        IList<T> GetMetrics(int agentId, TimeSpan fromTime, TimeSpan toTime);
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MetricsAgent.DTO
+namespace MetricsAgent
 {
     public class JobSchedule
     {
@@ -14,7 +14,6 @@ namespace MetricsAgent.DTO
         }
 
         public Type JobType { get; }
-
         public string CronExpression { get; }
     }
 }

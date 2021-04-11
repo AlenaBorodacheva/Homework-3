@@ -1,39 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Quartz;
-using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MetricsAgent.Jobs
 {
-    public class RamMetricJob
+    public class RamMetricJob : IJob
     {
         private readonly IServiceProvider _provider;
+        private readonly IRamMetricsRepository _repository;
 
-        private IRamMetricsRepository _repository;
-
-        private PerformanceCounter _RamCounter;
+        private PerformanceCounter _ramCounter;
 
         public RamMetricJob(IServiceProvider provider)
         {
             _provider = provider;
             _repository = _provider.GetService<IRamMetricsRepository>();
-            _RamCounter = new PerformanceCounter("Memory", "Available MBytes");
+            _ramCounter = new PerformanceCounter("Memory", "Available MBytes");
         }
 
         public Task Execute(IJobExecutionContext context)
         {
-            // получаем значение занятости DotNet
-            var RamUsageInPercents = Convert.ToInt32(_RamCounter.NextValue());
+            var ramUsageInPercents = Convert.ToInt32(_ramCounter.NextValue());
 
-            // узнаем когда мы сняли значение метрики.
             var time = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
-            // теперь можно записать что-то при помощи репозитория
-
-            _repository.Create(new RamMetric { Time = time, Value = RamUsageInPercents });
+            _repository.Create(new RamMetricDto { Time = time, Value = ramUsageInPercents });
 
             return Task.CompletedTask;
         }

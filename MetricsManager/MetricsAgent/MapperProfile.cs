@@ -10,11 +10,11 @@ namespace MetricsAgent
     {
         public MapperProfile()
         {
-            CreateMap<CpuMetric, CpuMetric>();
-            CreateMap<DotNetMetric, DotNetMetric>();
-            CreateMap<HddMetric, HddMetric>();
-            CreateMap<NetworkMetric, NetworkMetric>();
-            CreateMap<RamMetric, RamMetric>();
+            CreateMap<CpuMetricDto, CpuMetricDto>();
+            CreateMap<DotNetMetricDto, DotNetMetricDto>();
+            CreateMap<HddMetricDto, HddMetricDto>();
+            CreateMap<NetworkMetricDto, NetworkMetricDto>();
+            CreateMap<RamMetricDto, RamMetricDto>();
         }
     }
 }

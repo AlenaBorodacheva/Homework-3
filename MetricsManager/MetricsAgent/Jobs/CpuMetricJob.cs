@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Quartz;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Quartz;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MetricsAgent.Jobs
 {
@@ -10,9 +10,9 @@ namespace MetricsAgent.Jobs
     {
         // Инжектируем DI провайдер
         private readonly IServiceProvider _provider;
+        private readonly ICpuMetricsRepository _repository;
 
-        private ICpuMetricsRepository _repository;
-
+        // счетчик для метрики CPU
         private PerformanceCounter _cpuCounter;
 
         public CpuMetricJob(IServiceProvider provider)
@@ -32,7 +32,7 @@ namespace MetricsAgent.Jobs
 
             // теперь можно записать что-то при помощи репозитория
 
-            _repository.Create(new CpuMetric { Time = time, Value = cpuUsageInPercents });
+            _repository.Create(new CpuMetricDto { Time = time, Value = cpuUsageInPercents });
 
             return Task.CompletedTask;
         }

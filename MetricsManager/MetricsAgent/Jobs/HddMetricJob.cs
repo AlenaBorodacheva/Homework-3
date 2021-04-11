@@ -1,39 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Quartz;
-using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MetricsAgent.Jobs
 {
-    public class HddMetricJob
+    public class HddMetricJob : IJob
     {
         private readonly IServiceProvider _provider;
+        private readonly IHddMetricsRepository _repository;
 
-        private IHddMetricsRepository _repository;
-
-        private PerformanceCounter _HddCounter;
+        private PerformanceCounter _hddCounter;
 
         public HddMetricJob(IServiceProvider provider)
         {
             _provider = provider;
             _repository = _provider.GetService<IHddMetricsRepository>();
-            _HddCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            _hddCounter = new PerformanceCounter("Memory", "% Committed Bytes");  // очень не уверена, что правильно
         }
 
         public Task Execute(IJobExecutionContext context)
         {
-            // получаем значение занятости DotNet
-            var HddUsageInPercents = Convert.ToInt32(_HddCounter.NextValue());
+            var hddUsageInPercents = Convert.ToInt32(_hddCounter.NextValue());
 
-            // узнаем когда мы сняли значение метрики.
             var time = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
-            // теперь можно записать что-то при помощи репозитория
-
-            _repository.Create(new HddMetric { Time = time, Value = HddUsageInPercents });
+            _repository.Create(new HddMetricDto { Time = time, Value = hddUsageInPercents });
 
             return Task.CompletedTask;
         }

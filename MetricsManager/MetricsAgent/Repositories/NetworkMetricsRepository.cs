@@ -9,7 +9,7 @@ namespace MetricsAgent
 {
     // маркировочный интерфейс
     // необходим, чтобы проверить работу репозитория на тесте-заглушке
-    public interface INetworkMetricsRepository : IRepository<NetworkMetric>
+    public interface INetworkMetricsRepository : IRepository<NetworkMetricDto>
     {
     }
 
@@ -25,7 +25,7 @@ namespace MetricsAgent
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        public void Create(NetworkMetric item)
+        public void Create(NetworkMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -56,7 +56,7 @@ namespace MetricsAgent
             }
         }
 
-        public void Update(NetworkMetric item)
+        public void Update(NetworkMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -70,23 +70,32 @@ namespace MetricsAgent
             }
         }
 
-        public IList<NetworkMetric> GetAll()
+        public IList<NetworkMetricDto> GetAll()
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 // читаем при помощи Query и в шаблон подставляем тип данных
                 // объект которого Dapper сам и заполнит его поля
                 // в соответсвии с названиями колонок
-                return connection.Query<NetworkMetric>("SELECT Id, Time, Value FROM networkmetrics").ToList();
+                return connection.Query<NetworkMetricDto>("SELECT Id, Time, Value FROM networkmetrics").ToList();
             }
         }
 
-        public NetworkMetric GetById(int id)
+        public NetworkMetricDto GetById(int id)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.QuerySingle<NetworkMetric>("SELECT Id, Time, Value FROM networkmetrics WHERE id=@id",
+                return connection.QuerySingle<NetworkMetricDto>("SELECT Id, Time, Value FROM networkmetrics WHERE id=@id",
                     new { id = id });
+            }
+        }
+
+        public IList<NetworkMetricDto> GetMetrics(TimeSpan fromTime, TimeSpan toTime)
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<NetworkMetricDto>("SELECT Id, Time, Value FROM networkmetrics WHERE time>@fromTime AND time<@toTime",
+                    new { fromTime = fromTime, toTime = toTime }).ToList();
             }
         }
     }

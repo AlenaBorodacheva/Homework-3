@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using MetricsCommon;
 using System.Data.SQLite;
 using Dapper;
 
@@ -9,7 +9,7 @@ namespace MetricsAgent
 {
     // маркировочный интерфейс
     // необходим, чтобы проверить работу репозитория на тесте-заглушке
-    public interface ICpuMetricsRepository : IRepository<CpuMetric>
+    public interface ICpuMetricsRepository : IRepository<CpuMetricDto>
     {
     }
 
@@ -25,7 +25,7 @@ namespace MetricsAgent
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        public void Create(CpuMetric item)
+        public void Create(CpuMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -56,7 +56,7 @@ namespace MetricsAgent
             }
         }
 
-        public void Update(CpuMetric item)
+        public void Update(CpuMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -70,23 +70,32 @@ namespace MetricsAgent
             }
         }
 
-        public IList<CpuMetric> GetAll()
+        public IList<CpuMetricDto> GetAll()
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 // читаем при помощи Query и в шаблон подставляем тип данных
                 // объект которого Dapper сам и заполнит его поля
                 // в соответсвии с названиями колонок
-                return connection.Query<CpuMetric>("SELECT Id, Time, Value FROM cpumetrics WHERE time>@fromTime AND time<@toTime").ToList();
+                return connection.Query<CpuMetricDto>("SELECT Id, Time, Value FROM cpumetrics").ToList();
             }
         }
 
-        public CpuMetric GetById(int id)
+        public CpuMetricDto GetById(int id)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.QuerySingle<CpuMetric>("SELECT Id, Time, Value FROM cpumetrics WHERE id=@id",
+                return connection.QuerySingle<CpuMetricDto>("SELECT Id, Time, Value FROM cpumetrics WHERE id=@id",
                     new { id = id });
+            }
+        }
+
+        public IList<CpuMetricDto> GetMetrics(TimeSpan fromTime, TimeSpan toTime)
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<CpuMetricDto>("SELECT Id, Time, Value FROM cpumetrics WHERE time>@fromTime AND time<@toTime",
+                    new { fromTime = fromTime, toTime = toTime }).ToList();
             }
         }
     }

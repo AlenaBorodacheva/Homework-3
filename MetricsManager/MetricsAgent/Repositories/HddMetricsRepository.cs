@@ -9,7 +9,7 @@ namespace MetricsAgent
 {
     // маркировочный интерфейс
     // необходим, чтобы проверить работу репозитория на тесте-заглушке
-    public interface IHddMetricsRepository : IRepository<HddMetric>
+    public interface IHddMetricsRepository : IRepository<HddMetricDto>
     {
     }
 
@@ -25,7 +25,7 @@ namespace MetricsAgent
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        public void Create(HddMetric item)
+        public void Create(HddMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -56,7 +56,7 @@ namespace MetricsAgent
             }
         }
 
-        public void Update(HddMetric item)
+        public void Update(HddMetricDto item)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -70,23 +70,32 @@ namespace MetricsAgent
             }
         }
 
-        public IList<HddMetric> GetAll()
+        public IList<HddMetricDto> GetAll()
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 // читаем при помощи Query и в шаблон подставляем тип данных
                 // объект которого Dapper сам и заполнит его поля
                 // в соответсвии с названиями колонок
-                return connection.Query<HddMetric>("SELECT Id, Time, Value FROM hddmetrics").ToList();
+                return connection.Query<HddMetricDto>("SELECT Id, Time, Value FROM hddmetrics").ToList();
             }
         }
 
-        public HddMetric GetById(int id)
+        public HddMetricDto GetById(int id)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.QuerySingle<HddMetric>("SELECT Id, Time, Value FROM hddmetrics WHERE id=@id",
+                return connection.QuerySingle<HddMetricDto>("SELECT Id, Time, Value FROM hddmetrics WHERE id=@id",
                     new { id = id });
+            }
+        }
+
+        public IList<HddMetricDto> GetMetrics(TimeSpan fromTime, TimeSpan toTime)
+        {
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<HddMetricDto>("SELECT Id, Time, Value FROM hddmetrics WHERE time>@fromTime AND time<@toTime",
+                    new { fromTime = fromTime, toTime = toTime }).ToList();
             }
         }
     }

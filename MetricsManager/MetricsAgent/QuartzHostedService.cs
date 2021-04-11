@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MetricsAgent.DTO;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;

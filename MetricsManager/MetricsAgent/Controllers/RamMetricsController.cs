@@ -34,7 +34,7 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] RamMetricCreateRequest request)
         {
-            _repository.Create(_mapper.Map<RamMetric>(request));
+            _repository.Create(_mapper.Map<RamMetricDto>(request));
 
             _logger.LogInformation("Сообщение из RamMetricsController из метода Create");
             _logger.LogInformation($"{request.Time}, {request.Value}");
@@ -45,7 +45,7 @@ namespace MetricsAgent.Controllers
         [HttpPut("update")]
         public IActionResult Update([FromBody] RamMetricCreateRequest request)
         {
-            _repository.Update(_mapper.Map<RamMetric>(request));
+            _repository.Update(_mapper.Map<RamMetricDto>(request));
 
             _logger.LogInformation("Сообщение из RamMetricsController из метода Update");
             _logger.LogInformation($"{request.Time}, {request.Value}");
@@ -60,12 +60,12 @@ namespace MetricsAgent.Controllers
 
             var response = new AllRamMetricsResponse()
             {
-                Metrics = new List<RamMetric>()
+                Metrics = new List<RamMetricDto>()
             };
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(_mapper.Map<RamMetric>(metric));
+                response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
             }
 
             _logger.LogInformation("Сообщение из RamMetricsController из метода GetAll");
@@ -101,7 +101,20 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetrics");
             _logger.LogInformation($"{fromTime}, {toTime}");
-            return Ok();
+
+            var metrics = _repository.GetMetrics(fromTime, toTime);
+
+            var response = new AllRamMetricsResponse()
+            {
+                Metrics = new List<RamMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
+            }
+
+            return Ok(metrics);
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
@@ -110,6 +123,10 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsByPercentile");
             _logger.LogInformation($"{fromTime}, {toTime}, {percentile}");
+
+            var metrics = _repository.GetMetrics(fromTime, toTime);
+
+            //метод - заглушка
             return Ok();
         }
 
@@ -117,7 +134,79 @@ namespace MetricsAgent.Controllers
         public IActionResult GetMetricsAvailable()
         {
             _logger.LogInformation("Сообщение из RamMetricsController из метода GetMetricsAvailable");
+
+            //метод - заглушка
             return Ok();
+        }
+
+        [HttpGet("sql-read-write-test")]
+        public IActionResult TryToInsertAndRead()
+        {
+            // Создаем строку подключения в виде базы данных в оперативной памяти
+            string connectionString = "Data Source=:memory:";
+
+            // создаем соединение с базой данных
+            using (var connection = new SQLiteConnection(connectionString))
+            {
+                // открываем соединение
+                connection.Open();
+
+                // создаем объект через который будут выполняться команды к базе данных
+                using (var command = new SQLiteCommand(connection))
+                {
+                    // задаем новый текст команды для выполнения
+                    // удаляем таблицу с метриками если она существует в базе данных
+                    command.CommandText = "DROP TABLE IF EXISTS cpumetrics";
+                    // отправляем запрос в базу данных
+                    command.ExecuteNonQuery();
+
+                    // создаем таблицу с метриками
+                    command.CommandText = @"CREATE TABLE cpumetrics(id INTEGER PRIMARY KEY,
+                    value INT, time INT)";
+                    command.ExecuteNonQuery();
+
+                    // создаем запрос на вставку данных
+                    command.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(10,1)";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(50,2)";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(75,4)";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(90,5)";
+                    command.ExecuteNonQuery();
+
+                    // создаем строку для выборки данных из базы
+                    // LIMIT 3 обозначает, что мы достанем только 3 записи
+                    string readQuery = "SELECT * FROM cpumetrics LIMIT 3";
+
+                    // создаем массив, в который запишем объекты с данными из базы данных
+                    var returnArray = new RamMetricDto[3];
+                    // изменяем текст команды на наш запрос чтения
+                    command.CommandText = readQuery;
+
+                    // создаем читалку из базы данных
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        // счетчик для того, чтобы записать объект в правильное место в массиве
+                        var counter = 0;
+                        // цикл будет выполняться до тех пор, пока есть что читать из базы данных
+                        while (reader.Read())
+                        {
+                            // создаем объект и записываем его в массив
+                            returnArray[counter] = new RamMetricDto
+                            {
+                                Id = reader.GetInt32(0), // читаем данные полученные из базы данных
+                                Value = reader.GetInt32(0), // преобразуя к целочисленному типу
+                                Time = TimeSpan.FromSeconds(reader.GetInt32(0))
+                            };
+                            // увеличиваем значение счетчика
+                            counter++;
+                        }
+                    }
+                    // оборачиваем массив с данными в объект ответа и возвращаем пользователю 
+                    return Ok(returnArray);
+                }
+            }
         }
     }
 }
