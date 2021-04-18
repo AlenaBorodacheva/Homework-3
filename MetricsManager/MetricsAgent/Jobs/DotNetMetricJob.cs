@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Quartz;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using MetricsAgent.Models;
 
 namespace MetricsAgent.Jobs
 {
@@ -17,16 +18,16 @@ namespace MetricsAgent.Jobs
         {
             _provider = provider;
             _repository = _provider.GetService<IDotNetMetricsRepository>();
-            _dotnetCounter = new PerformanceCounter("Memory", "Private Bytes"); // очень не уверена, что правильно
+            _dotnetCounter = new PerformanceCounter("Memory", "Private Bytes");
         }
 
         public Task Execute(IJobExecutionContext context)
         {
             var dotnetUsageInPercents = Convert.ToInt32(_dotnetCounter.NextValue());
 
-            var time = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-            _repository.Create(new DotNetMetricDto { Time = time, Value = dotnetUsageInPercents });
+            _repository.Create(new DotNetMetric { Time = time, Value = dotnetUsageInPercents });
 
             return Task.CompletedTask;
         }

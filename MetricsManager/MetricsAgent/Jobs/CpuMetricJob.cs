@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Quartz;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using MetricsAgent.Models;
 
 namespace MetricsAgent.Jobs
 {
@@ -28,11 +29,11 @@ namespace MetricsAgent.Jobs
             var cpuUsageInPercents = Convert.ToInt32(_cpuCounter.NextValue());
 
             // узнаем когда мы сняли значение метрики.
-            var time = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             // теперь можно записать что-то при помощи репозитория
 
-            _repository.Create(new CpuMetricDto { Time = time, Value = cpuUsageInPercents });
+            _repository.Create(new CpuMetric { Time = time, Value = cpuUsageInPercents });
 
             return Task.CompletedTask;
         }

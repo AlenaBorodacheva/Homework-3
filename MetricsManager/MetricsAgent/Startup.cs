@@ -9,6 +9,7 @@ using Quartz.Spi;
 using Quartz;
 using Quartz.Impl;
 using MetricsAgent.Jobs;
+using MetricsCommon;
 
 namespace MetricsAgent
 {
@@ -21,8 +22,6 @@ namespace MetricsAgent
 
         public IConfiguration Configuration { get; }
 
-        private const string ConnectionString = @"Data Source=metrics.db; Version=3;";
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         { 
@@ -31,7 +30,7 @@ namespace MetricsAgent
                     // добавляем поддержку SQLite 
                     .AddSQLite()
                     // устанавливаем строку подключения
-                    .WithGlobalConnectionString(ConnectionString)
+                    .WithGlobalConnectionString(SQlSettings.ConnectionString)
                     // подсказываем где искать классы с миграциями
                     .ScanIn(typeof(Startup).Assembly).For.Migrations()
                 ).AddLogging(lb => lb

@@ -9,17 +9,6 @@ namespace MetricsAgent
     {
         public int Id { get; set; }
         public int Value { get; set; }
-        public TimeSpan Time { get; set; }
-    }
-
-    public class NetworkMetricCreateRequest
-    {
-        public TimeSpan Time { get; set; }
-        public int Value { get; set; }
-    }
-
-    public class AllNetworkMetricsResponse
-    {
-        public List<NetworkMetricDto> Metrics { get; set; }
+        public DateTimeOffset Time { get; set; }
     }
 }

@@ -4,20 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Data.SQLite;
 using Dapper;
+using MetricsAgent.Models;
 
 namespace MetricsAgent
 {
-    // маркировочный интерфейс
-    // необходим, чтобы проверить работу репозитория на тесте-заглушке
-    public interface IRamMetricsRepository : IRepository<RamMetricDto>
+    public interface IRamMetricsRepository : IRepository<RamMetric>
     {
     }
 
     public class RamMetricsRepository : IRamMetricsRepository
     {
-        // строка подключения
-        private const string ConnectionString = @"Data Source=metrics.db; Version=3;Pooling=True;Max Pool Size=100;";
-
         // инжектируем соединение с базой данных в наш репозиторий через конструктор
         public RamMetricsRepository()
         {
@@ -25,9 +21,9 @@ namespace MetricsAgent
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        public void Create(RamMetricDto item)
+        public void Create(RamMetric item)
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQlSettings.ConnectionString))
             {
                 //  запрос на вставку данных с плейсхолдерами для параметров
                 connection.Execute("INSERT INTO rammetrics(value, time) VALUES(@value, @time)",
@@ -39,62 +35,16 @@ namespace MetricsAgent
                         value = item.Value,
 
                         // записываем в поле time количество секунд
-                        time = item.Time.TotalSeconds
+                        time = item.Time
                     });
             }
         }
 
-        public void Delete(int id)
+        public IList<RamMetric> GetMetrics(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQlSettings.ConnectionString))
             {
-                connection.Execute("DELETE FROM rammetrics WHERE id=@id",
-                    new
-                    {
-                        id = id
-                    });
-            }
-        }
-
-        public void Update(RamMetricDto item)
-        {
-            using (var connection = new SQLiteConnection(ConnectionString))
-            {
-                connection.Execute("UPDATE rammetrics SET value = @value, time = @time WHERE id=@id",
-                    new
-                    {
-                        value = item.Value,
-                        time = item.Time.TotalSeconds,
-                        id = item.Id
-                    });
-            }
-        }
-
-        public IList<RamMetricDto> GetAll()
-        {
-            using (var connection = new SQLiteConnection(ConnectionString))
-            {
-                // читаем при помощи Query и в шаблон подставляем тип данных
-                // объект которого Dapper сам и заполнит его поля
-                // в соответсвии с названиями колонок
-                return connection.Query<RamMetricDto>("SELECT Id, Time, Value FROM rammetrics").ToList();
-            }
-        }
-
-        public RamMetricDto GetById(int id)
-        {
-            using (var connection = new SQLiteConnection(ConnectionString))
-            {
-                return connection.QuerySingle<RamMetricDto>("SELECT Id, Time, Value FROM rammetrics WHERE id=@id",
-                    new { id = id });
-            }
-        }
-
-        public IList<RamMetricDto> GetMetrics(TimeSpan fromTime, TimeSpan toTime)
-        {
-            using (var connection = new SQLiteConnection(ConnectionString))
-            {
-                return connection.Query<RamMetricDto>("SELECT Id, Time, Value FROM rammetrics WHERE time>@fromTime AND time<@toTime",
+                return connection.Query<RamMetric>("SELECT Id, Time, Value FROM rammetrics WHERE time>@fromTime AND time<@toTime",
                     new { fromTime = fromTime, toTime = toTime }).ToList();
             }
         }

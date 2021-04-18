@@ -4,20 +4,16 @@ using System.Linq;
 using MetricsCommon;
 using System.Data.SQLite;
 using Dapper;
+using MetricsAgent.Models;
 
 namespace MetricsAgent
 {
-    // маркировочный интерфейс
-    // необходим, чтобы проверить работу репозитория на тесте-заглушке
-    public interface IDotNetMetricsRepository : IRepository<DotNetMetricDto>
+    public interface IDotNetMetricsRepository : IRepository<DotNetMetric>
     {
     }
 
     public class DotNetMetricsRepository : IDotNetMetricsRepository
     {
-        // строка подключения
-        private const string ConnectionString = @"Data Source=metrics.db; Version=3;Pooling=True;Max Pool Size=100;";
-
         // инжектируем соединение с базой данных в наш репозиторий через конструктор
         public DotNetMetricsRepository()
         {
@@ -25,9 +21,9 @@ namespace MetricsAgent
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        public void Create(DotNetMetricDto item)
+        public void Create(DotNetMetric item)
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQlSettings.ConnectionString))
             {
                 //  запрос на вставку данных с плейсхолдерами для параметров
                 connection.Execute("INSERT INTO dotnetmetrics(value, time) VALUES(@value, @time)",
@@ -39,62 +35,16 @@ namespace MetricsAgent
                         value = item.Value,
 
                         // записываем в поле time количество секунд
-                        time = item.Time.TotalSeconds
+                        time = item.Time
                     });
             }
         }
 
-        public void Delete(int id)
+        public IList<DotNetMetric> GetMetrics(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQlSettings.ConnectionString))
             {
-                connection.Execute("DELETE FROM dotnetmetrics WHERE id=@id",
-                    new
-                    {
-                        id = id
-                    });
-            }
-        }
-
-        public void Update(DotNetMetricDto item)
-        {
-            using (var connection = new SQLiteConnection(ConnectionString))
-            {
-                connection.Execute("UPDATE dotnetmetrics SET value = @value, time = @time WHERE id=@id",
-                    new
-                    {
-                        value = item.Value,
-                        time = item.Time.TotalSeconds,
-                        id = item.Id
-                    });
-            }
-        }
-
-        public IList<DotNetMetricDto> GetAll()
-        {
-            using (var connection = new SQLiteConnection(ConnectionString))
-            {
-                // читаем при помощи Query и в шаблон подставляем тип данных
-                // объект которого Dapper сам и заполнит его поля
-                // в соответсвии с названиями колонок
-                return connection.Query<DotNetMetricDto>("SELECT Id, Time, Value FROM dotnetmetrics").ToList();
-            }
-        }
-
-        public DotNetMetricDto GetById(int id)
-        {
-            using (var connection = new SQLiteConnection(ConnectionString))
-            {
-                return connection.QuerySingle<DotNetMetricDto>("SELECT Id, Time, Value FROM dotnetmetrics WHERE id=@id",
-                    new { id = id });
-            }
-        }
-
-        public IList<DotNetMetricDto> GetMetrics(TimeSpan fromTime, TimeSpan toTime)
-        {
-            using (var connection = new SQLiteConnection(ConnectionString))
-            {
-                return connection.Query<DotNetMetricDto>("SELECT Id, Time, Value FROM dotnetmetrics WHERE time>@fromTime AND time<@toTime",
+                return connection.Query<DotNetMetric>("SELECT Id, Time, Value FROM dotnetmetrics WHERE time>@fromTime AND time<@toTime",
                     new { fromTime = fromTime, toTime = toTime }).ToList();
             }
         }

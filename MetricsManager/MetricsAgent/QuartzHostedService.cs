@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MetricsCommon;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;

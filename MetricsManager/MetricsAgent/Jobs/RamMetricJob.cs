@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Quartz;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using MetricsAgent.Models;
 
 namespace MetricsAgent.Jobs
 {
@@ -24,9 +25,9 @@ namespace MetricsAgent.Jobs
         {
             var ramUsageInPercents = Convert.ToInt32(_ramCounter.NextValue());
 
-            var time = TimeSpan.FromSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-            _repository.Create(new RamMetricDto { Time = time, Value = ramUsageInPercents });
+            _repository.Create(new RamMetric { Time = time, Value = ramUsageInPercents });
 
             return Task.CompletedTask;
         }
